@@ -492,22 +492,11 @@ ymin = 0.95, ymax = 1.05)
 gg
 
 
+#GAMS
 
-BTN::storel %>%
-  as.data.frame(xy=T) %>%
-  dplyr::filter(!is.na(z)) %>%
-  ggplot(aes(x, y, fill=z))+
-  geom_raster()+
-  coord_fixed()+
-  theme_void()+ ###remove if you want grey background
-  geom_point(data=wctcod %>%
-               group_by(lon, lat, Spp) %>%
-               count(),
-             aes(lon, lat, size=n), inherit.aes = F)+
-  scale_x_continuous(limits=c(-31700, -30500))+
-  scale_y_continuous(limits=c(6732600, 6733500))+
-  #facet_wrap(~Spp)+ (commented this because we only don't need to facet wrap the species)
-  labs(fill="max backscatter")+
-  theme(legend.position="top", legend.key.width=unit(3, "cm"))+
-  scale_fill_gradientn(colours=c("cadetblue", "darkblue", "purple"))
+library(gam)
+
+
+
+
 
