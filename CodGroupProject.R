@@ -11,17 +11,17 @@ setwd("~/Documents/SCHOOL /5th YEAR /MARI 4323/Group ")
 getwd()
 
 wct <- readRDS("wrasse2.RDS")
-## 
-
-##draws out cod from data set 
+ 
+##draw out cod from data set 
 wctcod<-wct %>%
   dplyr::filter(Spp=="Gadus morhua")
 
+#number of tagged individuals 
+wct.n <- wctcod %>%  group_by(Spp) %>% summarise(n.individuals = n_distinct(oid))
 
 ##2022 
 
-#OCTOBER
-
+#OCTOBE
 ##Filter out october depth data 
 october_depths <- wct %>%
   dplyr::filter(sensor == "depth") %>%
@@ -66,12 +66,11 @@ print(october_lunar)
 library(patchwork)
 
 combined_plot10 <- october_depths/october_lunar
-
 print(combined_plot10)
 
+ggsave( )
 
 #NOVEMBER
-
 ##Filter out november depth data 
 november_depths <- wct %>%
   dplyr::filter(sensor == "depth") %>%
@@ -494,8 +493,54 @@ gg
 
 #GAMS
 
+
+dat_summary <- dat. ###### error object 'dat' not found 
+
+wctcodtest <- wctcod %>%
+  mutate(date = floor_date(dt, unit = "day"))
+
+wctcodtest <- wctcodtest %>%
+  filter(sensor %in% "depth") %>%
+  group_by(oid, date) %>%
+  summarize(mean_depth = mean(Data)) %>%
+  ungroup()
+
+wctcodfinal <- wctcodtest %>%
+  mutate(LI = lunar::lunar.illumination(date), month = lubridate::month(date))
+
+#Hypothesis: cod depth is influenced by lunar illumination
+
+#depth as a function of lunar illumination
+M1 <- wctcodfinal %>% glm(mean_depth ~ LI, data = .)
+summary(M1)
+
+M2 <-  glm(mean_depth ~ 1, data = wctcodfinal)
+anova (M1, M2)
+
+####
+mgcv::gam(mean_depth ~ s(LI),data = wctcodfinal) %>%
+plot()
+
+summary(gam1)
+
+
 library(gam)
 
+require(mgcv)
+wctcodfinal %>%
+  gam(mean_depth ~ s(LI, k=5), data=.) %>% summary
+  predict(.,type="response", newdata=tibble(LI=seq(0, 1, by=0.1))) %>%
+  as_tibble %>%
+  bind_cols(seq(0, 1, by=0.1)) %>%
+  dplyr::rename(LI=2) %>%
+  ggplot(aes(LI, value))+
+  geom_point()+
+  geom_point(data=wctcodfinal, aes(LI, mean_depth), colour="red", alpha=00.1)+
+  theme_classic()+
+  geom_hline(yintercept=3)
+
+mgcv::gam(mean_depth ~ s(month, bs="cc") + LI,data = wctcodfinal) %>%
+  plot
 
 
 
