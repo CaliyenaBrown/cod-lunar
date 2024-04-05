@@ -19,439 +19,86 @@ wctcod<-wct %>%
 #number of tagged individuals 
 wct.n <- wctcod %>%  group_by(Spp) %>% summarise(n.individuals = n_distinct(oid))
 
-##2022 
 
-#OCTOBE
-##Filter out october depth data 
-october_depths <- wct %>%
+#2022
+
+year2022 <-  wctcod %>% dplyr::filter()
+
+
+depths2022 <- wctcod %>%
   dplyr::filter(sensor == "depth") %>%
   mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 10) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over october 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua October Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-        
-print(october_depths)
+  dplyr::filter(lubridate::year(dt) == 2022) %>%
+  ggplot(aes(x = factor(week(dt)), y = Data, fill = factor(month))) +
+  geom_boxplot(fill = "cadetblue3") +
+  labs(
+    x = "Week of the Year",
+    y = "Depth (m)") + theme_minimal() 
 
-library(lunar)
+plot(depths2022)
 
-october_lunar <- wct %>% 
+
+lunar2022 <- wctcod %>% 
   dplyr::select(dt, oid, Spp) %>% 
   mutate(lunar=lunar::lunar.illumination(dt)) %>% 
   mutate(dti=lubridate::date(dt)) %>%
   ungroup %>% 
   distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==10, year(dti)==2022) %>% 
+  dplyr::filter(year(dti)==2022) %>% 
   ggplot(aes(dti, lunar))+
   geom_line() + theme_minimal() +
   labs(
-    x = "Date",
+    x = "Month",
     y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-               limit = as.Date(c("2022-10-01", "2022-10-31")), 
-                               expand = expansion(add = 0.5))
+  ) 
 
-print(october_lunar)
+plot(lunar2022)
 
-#combine the plots using patchwork
-library(patchwork)
+#combine plots 
+combined_plot2022 = depths2022/lunar2022
+plot(combined_plot2022)
 
-combined_plot10 <- october_depths/october_lunar
-print(combined_plot10)
-
-ggsave( )
-
-#NOVEMBER
-##Filter out november depth data 
-november_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 11) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over november 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua November Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(november_depths)
-
-november_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==11, year(dti)==2022) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2022-11-01", "2022-11-30")), 
-                   expand = expansion(add = 0.5))
-
-print(november_lunar)
-
-#combine the plots using patchwork
-combined_plot11 <- november_depths/november_lunar
-
-print(combined_plot11)
-
-#DECEMBER
-##Filter out december depth data 
-december_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 12) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over december 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua December Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(december_depths)
-
-
-december_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==12, year(dti)==2022) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2022-12-01", "2022-12-31")), 
-                   expand = expansion(add = 0.5))
-
-print(december_lunar)
-
-#combine the plots using patchwork
-combined_plot12 <- december_depths/december_lunar
-
-print(combined_plot12)
-
+ggsave("10:12,2022.png",last_plot(), width = 8, height = 6, 
+       units = c("in"), dpi = 300)
 
 ##2023
-#JANUARY
 
-##Filter out January depth data 
-january_depths <- wct %>%
+##boxplot of depths 2023 (Jan to July)
+depths2023 <- wct %>%
   dplyr::filter(sensor == "depth") %>%
   mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 01) %>%
   dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over January 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua January Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(january_depths)
-
-#january lunar
-january_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==01, year(dti)==2023) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2023-01-01", "2023-01-30")), 
-                   expand = expansion(add = 0.5))
-
-print(january_lunar)
-
-#combine the plots using patchwork
-combined_plot01 <- january_depths/january_lunar
-
-print(combined_plot01)
-
-#FEBRUARY
-
-##Filter out february depth data 
-february_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 02) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over february 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua February Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(february_depths)
-
-#february lunar
-february_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==02, year(dti)==2023) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2023-02-01", "2023-02-28")), 
-                   expand = expansion(add = 0.5))
-
-print(february_lunar)
-
-#combine the plots using patchwork
-combined_plot02 <- february_depths/february_lunar
-
-print(combined_plot02)
-
-
-#MARCH
-
-##Filter out march depth data 
-march_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 03) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  
-  ##boxplot of depths over march
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua March Depth",
-       x = "Date", 
-       y = "Depth (m)") + 
-  theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(march_depths)
-
-#march lunar
-march_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==03, year(dti)==2023) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2023-03-01", "2023-03-31")), 
-                   expand = expansion(add = 0.5))
-
-print(march_lunar)
-
-#combine the plots using patchwork
-combined_plot03 <- march_depths/march_lunar
-
-print(combined_plot03)
-
-
-##APRIL 
-
-##boxplot of depths over April 
-April_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 04) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  ggplot(aes(x = factor(format(dt, "%d")), y = Data, fill = factor(month))) +
+  ggplot(aes(x = factor(week(dt)), y = Data, fill = factor(month))) +
   geom_boxplot(fill = "cadetblue3") +
-  labs(title = "Gadus morhua April Depth",
-       x = "Date",
-       y = "Depth (m)") + theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
+  labs(
+       x = "Week of the Year",
+       y = "Depth (m)") + theme_minimal() 
 
-print(April_depths)
 
-April_lunar <- wct %>% 
+print(depths2023)
+
+lunar2023 <- wctcod %>% 
   dplyr::select(dt, oid, Spp) %>% 
   mutate(lunar=lunar::lunar.illumination(dt)) %>% 
   mutate(dti=lubridate::date(dt)) %>%
   ungroup %>% 
   distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==04, year(dti)==2023) %>% 
+  dplyr::filter(year(dti)==2023) %>% 
   ggplot(aes(dti, lunar))+
   geom_line() + theme_minimal() +
   labs(
-    x = "Date",
+    x = "Month",
     y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                  limit = as.Date(c("2023-04-01", "2023-04-30")), 
-                        expand = expansion(add = 0.5))
+  ) 
 
-print(April_lunar)
+print(lunar2023)
 
 #combine the plots using patchwork
-combined_plot04 <- April_depths/April_lunar
+combined_plot2023 <- depths2023/lunar2023
+print(combined_plot2023)
 
-print(combined_plot04)
-
-
-##MAY 
-
-##boxplot of depths over may 
-May_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 05) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  ggplot(aes(x = factor(format(dt, "%d")), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue3") +
-  labs(title = "Gadus morhua April Depth",
-       x = "Date",
-       y = "Depth (m)") + theme_minimal() +
-  theme(axis.title.x = element_blank(), # Remove x-axis title
-        axis.text.x = element_blank(),# Remove x-axis text
-        axis.ticks.x = element_blank()) # Remove x-axis ticks 
-
-print(may_depths)
-
-may_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==05, year(dti)==2023) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  ) + scale_x_date(date_breaks = "2 day", date_labels = "%d", 
-                   limit = as.Date(c("2023-05-01", "2023-05-31")), 
-                   expand = expansion(add = 0.5))
-
-print(April_lunar)
-
-
-
-##boxplot of depths over July 
-July_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 07) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue3") +
-  labs(title = "Gadus morhua June Depth",
-       x = "Date",
-       y = "Depth (m)") + theme_minimal()
-
-print(July_depths)
-
-##check to see data points in june 
-
-July_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==07, year(dti)==2021) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal()
-
-print(July_lunar)
-
-##Filter out october depth data 
-october_depths <- wct %>%
-  dplyr::filter(sensor == "depth") %>%
-  mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(month == 10) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
-
-##boxplot of depths over october 
-  ggplot(aes(x = format(dt, "%d"), y = Data, fill = factor(month))) +
-  geom_boxplot(fill = "cadetblue2") +
-  labs(title = "Gadus morhua October Depth",
-    x = "Date",
-    y = "Depth (m)") + 
-    theme_minimal() +
-      theme(axis.title.x = element_blank(),  # Remove x-axis title
-      axis.text.x = element_blank(),   # Remove x-axis text
-      axis.ticks.x = element_blank()) # Remove x-axis ticks
-
-  print(october_depths)
-
-october_lunar <- wct %>% 
-  dplyr::select(dt, oid, Spp) %>% 
-  mutate(lunar=lunar::lunar.illumination(dt)) %>% 
-  mutate(dti=lubridate::date(dt)) %>%
-  ungroup %>% 
-  distinct(dti, lunar) %>% 
-  dplyr::filter(month(dti)==10, year(dti)==2021) %>% 
-  ggplot(aes(dti, lunar))+
-  geom_line() + theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Lunar Illumination"
-  )+
-  scale_x_date(date_breaks = "2 day", date_labels = "%d-%m")
-
-#combine the plots using patchwork
-combined_plot <- october_depths/october_lunar
-
-print(combined_plot)
-  
-
+ggsave("01:07,2023.png",last_plot(), width = 8, height = 6, 
+       units = c("in"), dpi = 300)
 
 
 
@@ -510,34 +157,42 @@ wctcodfinal <- wctcodtest %>%
 
 #Hypothesis: cod depth is influenced by lunar illumination
 
+library(gam)
+require(mgcv)
+
 #depth as a function of lunar illumination
 M1 <- wctcodfinal %>% glm(mean_depth ~ LI, data = .)
 summary(M1)
+plot(M1)
 
 M2 <-  glm(mean_depth ~ 1, data = wctcodfinal)
 anova (M1, M2)
 
 ####
-mgcv::gam(mean_depth ~ s(LI),data = wctcodfinal) %>%
+gam(mean_depth ~ s(LI),data = wctcodfinal) %>%
 plot()
 
-summary(gam1)
 
 
-library(gam)
-
-require(mgcv)
 wctcodfinal %>%
-  gam(mean_depth ~ s(LI, k=5), data=.) %>% summary
-  predict(.,type="response", newdata=tibble(LI=seq(0, 1, by=0.1))) %>%
-  as_tibble %>%
-  bind_cols(seq(0, 1, by=0.1)) %>%
-  dplyr::rename(LI=2) %>%
-  ggplot(aes(LI, value))+
-  geom_point()+
-  geom_point(data=wctcodfinal, aes(LI, mean_depth), colour="red", alpha=00.1)+
-  theme_classic()+
-  geom_hline(yintercept=3)
+  gam(mean_depth ~ s(LI, k=5) + s(month, bs="cc"), data=.) %>% summary
+  
+predicted <- predict(M1, type = "response", newdata = tibble(LI = seq(0, 1, by = 0.1)))
+
+# Creating a tibble with LI values and predicted mean_depth
+predicted_df <- tibble(LI = seq(0, 1, by = 0.1),
+  predicted_mean_depth = predicted)
+
+# Renaming LI column for consistency
+predicted_df <- predicted_df %>%
+  dplyr::rename(LI = 1)
+
+# Plotting predicted values and actual values
+ggplot() +
+geom_point(data = predicted_df, aes(LI, predicted_mean_depth), color = "blue") +
+geom_point(data = wctcodfinal, aes(LI, mean_depth), color = "dodgerblue", alpha = 0.1) +
+theme_classic() +
+geom_hline(yintercept = 3)
 
 mgcv::gam(mean_depth ~ s(month, bs="cc") + LI,data = wctcodfinal) %>%
   plot
