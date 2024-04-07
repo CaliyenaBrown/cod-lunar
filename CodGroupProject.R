@@ -6,7 +6,6 @@ require(lubridate)
 library(dplyr)
 
 
-
 setwd("~/Documents/SCHOOL /5th YEAR /MARI 4323/Group ")
 getwd()
 
@@ -17,13 +16,11 @@ wctcod<-wct %>%
   dplyr::filter(Spp=="Gadus morhua")
 
 #number of tagged individuals 
-wct.n <- wctcod %>%  group_by(Spp) %>% summarise(n.individuals = n_distinct(oid))
+wct.n <- wctcod %>%  group_by(Spp) %>%
+  summarise(n.individuals = n_distinct(oid))
 
 
 #2022
-
-year2022 <-  wctcod %>% dplyr::filter()
-
 
 depths2022 <- wctcod %>%
   dplyr::filter(sensor == "depth") %>%
@@ -37,6 +34,7 @@ depths2022 <- wctcod %>%
 
 plot(depths2022)
 
+library(lunar)
 
 lunar2022 <- wctcod %>% 
   dplyr::select(dt, oid, Spp) %>% 
@@ -54,6 +52,8 @@ lunar2022 <- wctcod %>%
 
 plot(lunar2022)
 
+library(patchwork)
+
 #combine plots 
 combined_plot2022 = depths2022/lunar2022
 plot(combined_plot2022)
@@ -64,16 +64,16 @@ ggsave("10:12,2022.png",last_plot(), width = 8, height = 6,
 ##2023
 
 ##boxplot of depths 2023 (Jan to July)
-depths2023 <- wct %>%
+depths2023 <- wctcod %>%
   dplyr::filter(sensor == "depth") %>%
   mutate(month = lubridate::month(dt)) %>%
-  dplyr::filter(Spp == "Gadus morhua") %>%
+  dplyr::filter(lubridate::year(dt) == 2023) %>%
   ggplot(aes(x = factor(week(dt)), y = Data, fill = factor(month))) +
   geom_boxplot(fill = "cadetblue3") +
   labs(
        x = "Week of the Year",
-       y = "Depth (m)") + theme_minimal() 
-
+       y = "Depth (m)") + theme_minimal() + 
+  scale_x_discrete(expand = c(0.05, 0.05))
 
 print(depths2023)
 
@@ -102,46 +102,7 @@ ggsave("01:07,2023.png",last_plot(), width = 8, height = 6,
 
 
 
-##practice with images of moons 
-
-library(ggplot2)
-library(png)
-library(grid)
-# Sample moon images dataframe (replace this with your actual moon images dataframe)
-moon_images <- data.frame(
-lunar_phase = c("New Moon", "First Quarter", "Full Moon", "Last Quarter"),
-image_path = c("new_moon_image.png", "first_quarter_image.png",
-"full_moon_image.png", "last_quarter_image.png"),
-dti = as.Date(c("2021-10-06", "2021-10-13", "2021-10-21", "2021-10-29"))  # Add corresponding dates
-)
-# Read moon images
-images <- lapply(moon_images$image_path, readPNG)
-# Create a list of raster grobs
-raster_grobs <- lapply(images, rasterGrob)
-# Add moon images as annotations
-october_lunar <- wct %>%
-dplyr::select(dt, oid, Spp) %>%
-mutate(lunar = lunar::lunar.illumination(dt)) %>%
-mutate(dti = lubridate::date(dt)) %>%
-ungroup() %>%
-distinct(dti, lunar) %>%
-dplyr::filter(month(dti) == 10, year(dti) == 2021)
-gg <- ggplot(october_lunar, aes(dti, lunar)) +
-geom_line() +
-theme_minimal()
-for (i in seq_along(raster_grobs)) {
-gg <- gg + annotation_custom(raster_grobs[[i]],
-xmin = as.numeric(moon_images$dti[i]) - 0.5,
-xmax = as.numeric(moon_images$dti[i]) + 0.5,
-ymin = 0.95, ymax = 1.05)
-}
-gg
-
-
 #GAMS
-
-
-dat_summary <- dat. ###### error object 'dat' not found 
 
 wctcodtest <- wctcod %>%
   mutate(date = floor_date(dt, unit = "day"))
@@ -173,9 +134,8 @@ gam(mean_depth ~ s(LI),data = wctcodfinal) %>%
 plot()
 
 
-
 wctcodfinal %>%
-  gam(mean_depth ~ s(LI, k=5) + s(month, bs="cc"), data=.) %>% summary
+  gam(mean_depth ~ s(LI, k=5) + s(month, bs="cc"), data=.) %>% summary 
   
 predicted <- predict(M1, type = "response", newdata = tibble(LI = seq(0, 1, by = 0.1)))
 
@@ -190,13 +150,22 @@ predicted_df <- predicted_df %>%
 # Plotting predicted values and actual values
 ggplot() +
 geom_point(data = predicted_df, aes(LI, predicted_mean_depth), color = "blue") +
-geom_point(data = wctcodfinal, aes(LI, mean_depth), color = "dodgerblue", alpha = 0.1) +
-theme_classic() +
-geom_hline(yintercept = 3)
+geom_point(data = wctcodfinal, aes(LI, mean_depth), color = "dodgerblue", 
+          alpha = 0.2) +
+          theme_classic() +
+          labs(
+            x = "Lunar Illumination",
+            y = "Depth (m)"
+          ) + 
+          geom_hline(yintercept = 3)
+
+ggsave("GamPlot.png",last_plot(), width = 8, height = 5, 
+        units = c("in"), dpi = 300)
 
 mgcv::gam(mean_depth ~ s(month, bs="cc") + LI,data = wctcodfinal) %>%
   plot
 
 
-
+ggsave("GamPlotMonth.png",last_plot(), width = 8, height = 5, 
+       units = c("in"), dpi = 300)
 
